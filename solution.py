@@ -1,5 +1,6 @@
 import csv
 import json
+import sys
 from os import path
 
 class Parse:
@@ -55,16 +56,16 @@ class Parse:
             raise TypeError(f"Column passed {column} is not an integer.")
 
         with open(self.file, encoding="utf-8") as csvfile:
-            # Load file and remove the header line
+            # Load file and remove the header line, finding the column containing scores
             line_reader = csv.reader(csvfile, delimiter=",")
-            next(line_reader)
+            score_position = next(line_reader).index("q1 score")
 
             for row in line_reader:
                 # Error checking on score
-                if not row[3].isnumeric() or not 0 <= int(row[3]) <= 100:
+                if not row[score_position].isnumeric() or not 0 <= int(row[score_position]) <= 100:
                     raise ValueError(
-                        f"Score {row[3]} given by {row[2]} in sentence {row[0]} is not an integer between 0 and 100.")
-                score = int(row[3])
+                        f"Score {row[score_position]} given by {row[2]} in sentence {row[0]} is not an integer between 0 and 100.")
+                score = int(row[score_position])
 
                 # Add all keys to data dict
                 try:
@@ -139,12 +140,14 @@ class Parse:
 
 
 def main():
-    ex_1 = Parse("..\\Code Exercise -  BBC\\bg-sentence-pair-scores1.csv")
+    csv_file = sys.argv[1]
+
+    ex_1 = Parse(csv_file)
     ex_1.read_score(2)
     ex_1.calculate_average()
     ex_1.output_json("1.json")
 
-    ex_2 = Parse("..\\Code Exercise -  BBC\\bg-sentence-pair-scores1.csv")
+    ex_2 = Parse(csv_file)
     ex_2.read_score(0)
     ex_2.calculate_average()
     ex_2.calculate_high_low()
